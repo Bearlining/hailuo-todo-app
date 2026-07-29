@@ -1,0 +1,15 @@
+# GitHub 语言统计配置
+* text=auto
+
+# 标记构建文件为二进制，避免差异比较
+docs/** binary
+dist/** binary
+
+# TypeScript 和 React 文件
+*.tsx linguist-detectable=true
+*.ts linguist-detectable=true
+
+# 配置文件
+*.json linguist-detectable=false
+*.yml linguist-detectable=false
+*.yaml linguist-detectable=false
