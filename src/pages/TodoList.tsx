@@ -393,7 +393,7 @@ export function TodoList({ showAddModal = false, onAddClose }: TodoListProps) {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <span className="text-gray-700">{cat.name}</span>
+                  <span className="text-gray-700">{t(CATEGORY_KEYS[cat.id]) || cat.name}</span>
                 </button>
               ))}
             </div>

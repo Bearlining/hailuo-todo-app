@@ -154,7 +154,7 @@ export function AddTodo({ onClose }: AddTodoProps) {
                     backgroundColor: category === cat.id ? cat.color : undefined,
                   }}
                 >
-                  {cat.name}
+                  {t(CATEGORY_KEYS[cat.id]) || cat.name}
                 </button>
               ))}
             </div>

@@ -37,9 +37,7 @@ export interface TodoStats {
 
 export interface Category {
   id: string;
-  // 分类名(显示给用户)。注:为兼容旧的"工作"/"生活"数据,
-  // 这里直接保留中文 default 值作为 fallback; i18n 化主要通过
-  // 组件里读 DEFAULT_CATEGORY_KEYS[id] + t() 实现。
+  // Category display name (English default; components should prefer i18n keys via CATEGORY_KEYS)
   name: string;
   color: string;
   icon: string;
@@ -70,16 +68,16 @@ export const PRIORITY_COLORS = {
   high: '#FFB7B2',     // 粉红 - 高优先级
 } as const;
 
-// 默认分类(用户的 category 字段会用这里的 id 和 name)
+// Default categories (user's category field uses id; components display via i18n CATEGORY_KEYS)
 export const DEFAULT_CATEGORIES: Category[] = [
-  { id: 'work', name: '工作', color: '#FFB7B2', icon: 'briefcase' },
-  { id: 'life', name: '生活', color: '#B5EAD7', icon: 'home' },
-  { id: 'study', name: '学习', color: '#C7CEEA', icon: 'book' },
-  { id: 'health', name: '健康', color: '#FFDAC1', icon: 'heart' },
-  { id: 'other', name: '其他', color: '#E2F0CB', icon: 'more-horizontal' },
+  { id: 'work', name: 'Work', color: '#FFB7B2', icon: 'briefcase' },
+  { id: 'life', name: 'Life', color: '#B5EAD7', icon: 'home' },
+  { id: 'study', name: 'Study', color: '#C7CEEA', icon: 'book' },
+  { id: 'health', name: 'Health', color: '#FFDAC1', icon: 'heart' },
+  { id: 'other', name: 'Other', color: '#E2F0CB', icon: 'more-horizontal' },
 ];
 
-// i18n key 映射(组件用 t(categoryKey[id]) 显示本地化名)
+// i18n key mapping for category names (components use t(CATEGORY_KEYS[id]))
 export const CATEGORY_KEYS: Record<string, string> = {
   work: 'category.work',
   life: 'category.life',

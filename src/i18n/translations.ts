@@ -138,7 +138,7 @@ export const translations = {
   'todolist.exportSuccess': 'Exported {count} item(s)',
   'todolist.exportNone': 'Nothing to export',
   'todolist.view.list': 'List',
-  'todolist.view.kanban': 'Kanban',
+  'todolist.view.kanban': 'Board',
   'todolist.view.calendar': 'Calendar',
   'todolist.group.category': 'By category',
   'todolist.group.priority': 'By priority',
