@@ -49,7 +49,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
   };
 
   const dateLocale = language === 'en' ? 'en-US' : 'zh-CN';
-  const suffix = language === 'en' ? 'En' : '';
+  // English-only project — translations.ts only has English keys.
+const suffix = '';
 
   return (
     <div className="min-h-screen">
