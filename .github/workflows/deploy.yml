@@ -46,7 +46,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
-          directory: dist
+          directory: docs  # vite.config.ts 输出目录（GitHub Pages 兼容）
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: '4'
         env:
