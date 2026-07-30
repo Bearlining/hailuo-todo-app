@@ -183,7 +183,8 @@ export function EditTodo({ onClose }: EditTodoProps) {
               {t('todoForm.field.dueDate')}
             </label>
             <Input
-              type="date"
+              type="text"
+              placeholder="YYYY-MM-DD"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               className="text-gray-600"
