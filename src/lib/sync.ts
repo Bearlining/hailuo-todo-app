@@ -96,16 +96,32 @@ function serialiseTodo(todo: Todo): SerialisedTodo {
     p: todo.priority,
     cat: todo.category,
     tg: todo.tags,
-    cr: todo.createdAt ? todo.createdAt.getTime() : null,
-    dd: todo.dueDate ? todo.dueDate.getTime() : null,
-    rt: todo.reminderTime ? todo.reminderTime.getTime() : null,
-    cp: todo.completedAt ? todo.completedAt.getTime() : null,
+    // Date instances are round-tripped through JSON.stringify (which makes
+    // them ISO strings), so on re-load `createdAt` may be a string OR a Date.
+    // Normalise to ms-since-epoch.
+    cr: toEpoch(todo.createdAt),
+    dd: toEpoch(todo.dueDate),
+    rt: toEpoch(todo.reminderTime),
+    cp: toEpoch(todo.completedAt),
     a: todo.isArchived,
-    aa: todo.archivedAt ? todo.archivedAt.getTime() : null,
+    aa: toEpoch(todo.archivedAt),
     rpt: todo.repeatType,
-    rpe: todo.repeatEndDate ? todo.repeatEndDate.getTime() : null,
+    rpe: toEpoch(todo.repeatEndDate),
     st: todo.subTasks.map((s) => ({ i: s.id, t: s.title, c: s.isCompleted })),
   };
+}
+
+// Normalise a value that *should* be a Date into ms-since-epoch.
+// Accepts Date | string | number | null | undefined.
+function toEpoch(v: unknown): number | null {
+  if (v == null) return null;
+  if (v instanceof Date) return v.getTime();
+  if (typeof v === 'number') return v;
+  if (typeof v === 'string') {
+    const t = new Date(v).getTime();
+    return isNaN(t) ? null : t;
+  }
+  return null;
 }
 
 function deserialiseTodo(s: SerialisedTodo): Todo {
