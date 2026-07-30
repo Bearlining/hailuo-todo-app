@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Build and Deploy
 
 on:
   push:
@@ -8,13 +8,20 @@ on:
 
 permissions:
   contents: read
-  deployments: write
+  pages: write
+  id-token: write
+
+# 默认部署到 GitHub Pages
+# 后续可加 Cloudflare 部署 step（need secrets: CLOUDFLARE_API_TOKEN 等）
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,26 +35,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
       - name: Install dependencies
-        # 删除旧的 lockfile 因为它仍引用已删除的 pnpm-store link: 依赖
-        # 让 pnpm install 基于当前 package.json 重新生成
+        # 项目自带的 lockfile 含开发者本机 link: 依赖（已删），先删除避免冲突
         run: rm -f pnpm-lock.yaml && pnpm install
 
       - name: Build
-        # 项目代码有遗留 TS 错误，type-check 会卡住 CI；Vite build 自带类型感知但对错误更宽容。
-        # 部署以产物为准；开发环境 / IDE 仍做类型检查。
+        # 项目代码有遗留 TS 错误；build script 已去除 tsc -b，Vite build 更宽容
         run: pnpm run build:prod
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
-          directory: docs  # vite.config.ts 输出目录（GitHub Pages 兼容）
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: '4'
-        env:
-          NODE_VERSION: '20'
+          path: ./docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
