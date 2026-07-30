@@ -4,14 +4,14 @@
 
 import { useEffect, useState } from 'react';
 import { X, Download, Upload, AlertTriangle, Eye, EyeOff } from 'lucide-react';
-import { useTranslation } from '../i18n';
+import { useTranslation } from '../../i18n';
 import {
   decodeSync,
   readSyncHash,
   clearSyncHash,
   summaryFor,
-} from '../lib/sync';
-import type { Todo } from '../types/todo';
+} from '../../lib/sync';
+import type { Todo } from '../../types/todo';
 
 interface IncomingSync {
   count: number;

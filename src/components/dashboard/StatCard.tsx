@@ -1,7 +1,7 @@
 import React from 'react';
-import { useTranslation } from '../i18n';
+import { useTranslation } from '../../i18n';
 import { LucideIcon } from 'lucide-react';
-import { Card } from '../ui/card';
+import { Card } from '../../ui/card';
 import { cn } from '../../lib/utils';
 
 interface StatCardProps {

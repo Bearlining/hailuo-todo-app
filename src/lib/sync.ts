@@ -65,7 +65,7 @@ async function decompress(bytes: Uint8Array, compressed: boolean): Promise<strin
 interface SyncPayload {
   v: number;
   ts: number; // generation timestamp (ms)
-  todos: Todo[];
+  todos: SerialisedTodo[];
 }
 
 interface SerialisedTodo {

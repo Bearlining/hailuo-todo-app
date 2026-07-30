@@ -1,5 +1,5 @@
 import React from 'react';
-import { I18nContext } from '../../i18n';
+import { I18nContext } from '../i18n';
 
 const searilizeError = (error: any) => {
   if (error instanceof Error) {
