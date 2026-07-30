@@ -3,7 +3,7 @@ import { X, Calendar, Tag, Repeat } from 'lucide-react';
 import { useTodo } from '../context/TodoContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { PRIORITY_COLORS } from '../types/todo';
+import { PRIORITY_COLORS, CATEGORY_KEYS } from '../types/todo';
 import { useTranslation } from '../i18n';
 
 interface AddTodoProps {
