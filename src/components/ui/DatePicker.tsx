@@ -69,8 +69,6 @@ export function DatePicker({ value, onChange, placeholder = 'Pick a date', class
   };
 
   const selectDate = (day: number) => {
-    // eslint-disable-next-line no-console
-    console.log('[DatePicker] selectDate', day, 'viewYear=', viewYear, 'viewMonth=', viewMonth);
     const y = viewYear;
     const m = String(viewMonth + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
