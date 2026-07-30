@@ -117,9 +117,11 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
             mode="single"
             selected={selected}
             onDayClick={handleDayClick}
+            onSelect={handleSelect}
             locale={enUS}
             showOutsideDays
             weekStartsOn={0}
+            required
           />
         </div>
       )}
