@@ -63,6 +63,14 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
     setOpen(false);
   };
 
+  // DayPicker v8 fires onDayClick on every cell click, including outside-days.
+  // We use it as a more reliable trigger than onSelect (which can be no-op in some configs).
+  const handleDayClick = (day: Date) => {
+    // eslint-disable-next-line no-console
+    console.log('[DatePicker] handleDayClick', day);
+    handleSelect(day);
+  };
+
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange('');
@@ -108,7 +116,7 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
           <DayPicker
             mode="single"
             selected={selected}
-            onSelect={handleSelect}
+            onDayClick={handleDayClick}
             locale={enUS}
             showOutsideDays
             weekStartsOn={0}
