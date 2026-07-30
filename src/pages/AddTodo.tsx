@@ -3,6 +3,7 @@ import { X, Calendar, Tag, Repeat } from 'lucide-react';
 import { useTodo } from '../context/TodoContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { DatePicker } from '../components/ui/DatePicker';
 import { PRIORITY_COLORS, CATEGORY_KEYS } from '../types/todo';
 import { useTranslation } from '../i18n';
 
@@ -166,12 +167,10 @@ export function AddTodo({ onClose }: AddTodoProps) {
               <Calendar className="w-4 h-4 text-mint-400" />
               {t('todoForm.field.dueDate')}
             </label>
-            <Input
-              type="text"
-              placeholder="YYYY-MM-DD"
+            <DatePicker
               value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="text-gray-600"
+              onChange={setDueDate}
+              placeholder="Pick due date"
             />
           </div>
 
@@ -210,13 +209,12 @@ export function AddTodo({ onClose }: AddTodoProps) {
           {repeatType !== 'none' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('todoForm.field.dueDate')}
+                {t('todoForm.repeat.endDate')}
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={repeatEndDate}
-                onChange={(e) => setRepeatEndDate(e.target.value)}
-                className="text-gray-600"
+                onChange={setRepeatEndDate}
+                placeholder="Pick repeat end date"
               />
             </div>
           )}

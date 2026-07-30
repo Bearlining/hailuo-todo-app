@@ -1,0 +1,57 @@
+/* English-locale overrides — DayPicker's bundled CSS uses .rdp class.
+   We re-skin it to match the rest of the todo app (macaron palette). */
+
+.rdp {
+  --rdp-cell-size: 36px;
+  --rdp-accent-color: #FFB7B2;
+  --rdp-background-color: rgba(255, 183, 178, 0.15);
+  margin: 0;
+  font-family: inherit;
+}
+
+.rdp-day_selected,
+.rdp-day_selected:focus-visible,
+.rdp-day_selected:hover {
+  background-color: #FFB7B2;
+  color: white;
+  border-radius: 9999px;
+}
+
+.rdp-day:hover:not(.rdp-day_selected) {
+  background-color: #FFF0EF;
+  border-radius: 9999px;
+}
+
+.rdp-day_today {
+  font-weight: 700;
+  color: #FF6B61;
+}
+
+.rdp-head_cell {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rdp-button:focus-visible,
+.rdp-day:focus-visible {
+  outline: 2px solid #FFB7B2;
+  outline-offset: 1px;
+  border-radius: 9999px;
+}
+
+.rdp-nav button {
+  color: #6b7280;
+}
+
+.rdp-nav button:hover {
+  background-color: #FFF0EF;
+  border-radius: 9999px;
+}
+
+.rdp-caption_label {
+  font-weight: 600;
+  color: #1f2937;
+}

@@ -3,6 +3,7 @@ import { X, Calendar, Tag } from 'lucide-react';
 import { useTodo } from '../context/TodoContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { DatePicker } from '../components/ui/DatePicker';
 import { PRIORITY_COLORS } from '../types/todo';
 import { Todo } from '../types/todo';
 import { useTranslation } from '../i18n';
@@ -182,12 +183,10 @@ export function EditTodo({ onClose }: EditTodoProps) {
               <Calendar className="w-4 h-4 text-mint-400" />
               {t('todoForm.field.dueDate')}
             </label>
-            <Input
-              type="text"
-              placeholder="YYYY-MM-DD"
+            <DatePicker
               value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="text-gray-600"
+              onChange={setDueDate}
+              placeholder="Pick due date"
             />
           </div>
 
