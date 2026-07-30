@@ -4,7 +4,7 @@ import { useTodo } from '../context/TodoContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { DatePicker } from '../components/ui/DatePicker';
-import { PRIORITY_COLORS } from '../types/todo';
+import { PRIORITY_COLORS, CATEGORY_KEYS } from '../types/todo';
 import { Todo } from '../types/todo';
 import { useTranslation } from '../i18n';
 

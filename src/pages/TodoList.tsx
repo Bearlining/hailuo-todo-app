@@ -21,7 +21,7 @@ import { Input } from '../components/ui/input';
 import { TodoCard } from '../components/todo/TodoCard';
 import { CalendarView } from '../components/todo/CalendarView';
 import { KanbanView } from '../components/todo/KanbanView';
-import { Todo } from '../types/todo';
+import { Todo, CATEGORY_KEYS } from '../types/todo';
 
 type FilterType = 'all' | 'pending' | 'completed' | 'overdue' | 'today' | 'week' | 'month';
 type ViewType = 'list' | 'calendar' | 'kanban';
