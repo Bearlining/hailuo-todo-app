@@ -33,17 +33,22 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
   useEffect(() => {
     if (!open) return;
     const onClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      // Defer to next tick — by then any DayPicker onSelect/onDayClick has already fired
+      setTimeout(() => {
+        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+          setOpen(false);
+        }
+      }, 0);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
     };
-    document.addEventListener('mousedown', onClickOutside);
+    // Use 'click' not 'mousedown' — mousedown fires BEFORE DayPicker's button click,
+    // so mousedown handler can close the popover before onSelect fires.
+    document.addEventListener('click', onClickOutside);
     document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('click', onClickOutside);
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
