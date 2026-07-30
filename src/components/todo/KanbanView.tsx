@@ -108,7 +108,7 @@ export function KanbanView({ onEdit, onToggle, onArchive }: KanbanViewProps) {
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: categoryInfo.color }}
                 />
-                <h3 className="font-medium text-gray-800">{categoryInfo.name}</h3>
+                <h3 className="font-medium text-gray-800">{t(CATEGORY_KEYS[categoryId]) || categoryInfo.name}</h3>
                 <span className="text-xs text-gray-400">
                   ({pending.length + completed.length})
                 </span>
