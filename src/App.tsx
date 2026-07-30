@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TodoProvider, useTodo } from './context/TodoContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { I18nProvider, useTranslation } from './i18n';
@@ -16,43 +16,33 @@ import type { Todo } from './types/todo';
 
 type TabType = 'dashboard' | 'todos' | 'statistics' | 'settings';
 
-function AppContent() {
-  const { t } = useTranslation();
+function InnerAppContent() {
+  // useTodo 必须在 TodoProvider 内部 — 拆到 Inner 子组件
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const { state, dispatch, importTodos } = useTodo();
   const existingCount = state.todos.length;
 
-  // 初始化主题
   useEffect(() => {
     initTheme();
   }, []);
 
-  // 监听编辑待办事件
   useEffect(() => {
-    const handleEditTodo = () => {
-      setShowEditModal(true);
-    };
+    const handleEditTodo = () => setShowEditModal(true);
     window.addEventListener('edit-todo', handleEditTodo);
     return () => window.removeEventListener('edit-todo', handleEditTodo);
   }, []);
 
-  // Sync 处理：把 incoming todos 应用到本地 state
   const handleSyncMerge = (incoming: Todo[]) => {
-    const before = state.todos.length;
     importTodos(incoming);
-    return { added: incoming.length, existing: before };
+    return { added: incoming.length, existing: existingCount };
   };
   const handleSyncReplace = (incoming: Todo[]) => {
-    // Replace = 清空再导入
     dispatch({ type: 'LOAD_TODOS', payload: incoming });
   };
-  const handleSyncDiscard = () => {
-    // no-op; dialog already cleared the hash
-  };
+  const handleSyncDiscard = () => {};
 
-  // 渲染当前页面
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -69,123 +59,78 @@ function AppContent() {
   };
 
   return (
-    <ThemeProvider>
-      <TodoProvider>
-        <FallingItemsProvider>
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-mint-50">
-          {/* 主内容 */}
-          <main className="pb-20">
-            {renderContent()}
-          </main>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-mint-50">
+      <main className="pb-20">
+        {renderContent()}
+      </main>
 
-          {/* 添加按钮（右上角固定，留出安全边距） */}
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="fixed top-4 right-16 z-40 w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-peach-400 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
+      <button
+        onClick={() => setShowAddModal(true)}
+        className="fixed top-4 right-16 z-40 w-10 h-10 rounded-full bg-gradient-to-r from-pink-400 to-peach-400 text-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+      >
+        <Plus className="w-5 h-5" />
+      </button>
 
-          {/* 底部Tab导航栏 - 4个均匀分布 */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-pink-100 z-50">
-            <div className="max-w-md mx-auto flex justify-around items-center py-2 px-2">
-              {/* 首页Tab */}
-              <button
-                onClick={() => setActiveTab('dashboard')}
-                className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 relative ${
-                  activeTab === 'dashboard'
-                    ? 'text-pink-500 bg-pink-50'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                <Home className={`w-5 h-5 ${activeTab === 'dashboard' ? 'scale-110' : ''}`} />
-                <span className="text-xs mt-1 font-medium">{t('nav.dashboard')}</span>
-                {activeTab === 'dashboard' && (
-                  <div className="absolute bottom-0 w-6 h-1 bg-gradient-to-r from-pink-400 to-peach-400 rounded-full" />
-                )}
-              </button>
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-              {/* 待办列表Tab */}
-              <button
-                onClick={() => setActiveTab('todos')}
-                className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 relative ${
-                  activeTab === 'todos'
-                    ? 'text-pink-500 bg-pink-50'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                <List className={`w-5 h-5 ${activeTab === 'todos' ? 'scale-110' : ''}`} />
-                <span className="text-xs mt-1 font-medium">{t('nav.todos')}</span>
-                {activeTab === 'todos' && (
-                  <div className="absolute bottom-0 w-6 h-1 bg-gradient-to-r from-pink-400 to-peach-400 rounded-full" />
-                )}
-              </button>
+      {showAddModal && <AddTodo onClose={() => setShowAddModal(false)} />}
+      {showEditModal && <EditTodo onClose={() => setShowEditModal(false)} />}
 
-              {/* 统计Tab */}
-              <button
-                onClick={() => setActiveTab('statistics')}
-                className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 relative ${
-                  activeTab === 'statistics'
-                    ? 'text-pink-500 bg-pink-50'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                <TrendingUp className={`w-5 h-5 ${activeTab === 'statistics' ? 'scale-110' : ''}`} />
-                <span className="text-xs mt-1 font-medium">{t('nav.statistics')}</span>
-                {activeTab === 'statistics' && (
-                  <div className="absolute bottom-0 w-6 h-1 bg-gradient-to-r from-pink-400 to-peach-400 rounded-full" />
-                )}
-              </button>
+      <SyncDialog
+        onMerge={handleSyncMerge}
+        onReplace={handleSyncReplace}
+        onDiscard={handleSyncDiscard}
+        existingCount={existingCount}
+      />
 
-              {/* 设置Tab */}
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 relative ${
-                  activeTab === 'settings'
-                    ? 'text-pink-500 bg-pink-50'
-                    : 'text-gray-400 hover:text-gray-600'
-                }`}
-              >
-                <SettingsIcon className={`w-5 h-5 ${activeTab === 'settings' ? 'scale-110' : ''}`} />
-                <span className="text-xs mt-1 font-medium">{t('nav.settings')}</span>
-                {activeTab === 'settings' && (
-                  <div className="absolute bottom-0 w-6 h-1 bg-gradient-to-r from-pink-400 to-peach-400 rounded-full" />
-                )}
-              </button>
-            </div>
-          </nav>
-        </div>
+      <FallingItemsLayer />
+    </div>
+  );
+}
 
-        {/* 添加待办弹窗 */}
-        {showAddModal && (
-          <AddTodo onClose={() => setShowAddModal(false)} />
-        )}
+function BottomNav({ activeTab, onTabChange }: { activeTab: TabType; onTabChange: (t: TabType) => void }) {
+  const { t } = useTranslation();
 
-        {/* 编辑待办弹窗 */}
-        {showEditModal && (
-          <EditTodo onClose={() => setShowEditModal(false)} />
-        )}
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-pink-100 z-50">
+      <div className="max-w-md mx-auto flex justify-around items-center py-2 px-2">
+        <NavButton icon={<Home className="w-5 h-5" />} label={t('nav.dashboard')} active={activeTab === 'dashboard'} onClick={() => onTabChange('dashboard')} />
+        <NavButton icon={<List className="w-5 h-5" />} label={t('nav.todos')} active={activeTab === 'todos'} onClick={() => onTabChange('todos')} />
+        <NavButton icon={<TrendingUp className="w-5 h-5" />} label={t('nav.statistics')} active={activeTab === 'statistics'} onClick={() => onTabChange('statistics')} />
+        <NavButton icon={<SettingsIcon className="w-5 h-5" />} label={t('nav.settings')} active={activeTab === 'settings'} onClick={() => onTabChange('settings')} />
+      </div>
+    </nav>
+  );
+}
 
-        {/* 同步数据弹窗 (URL hash 触发) */}
-        <SyncDialog
-          onMerge={handleSyncMerge}
-          onReplace={handleSyncReplace}
-          onDiscard={handleSyncDiscard}
-          existingCount={existingCount}
-        />
-
-        {/* 彩蛋动画层 */}
-        <FallingItemsLayer />
-        </FallingItemsProvider>
-      </TodoProvider>
-    </ThemeProvider>
+function NavButton({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-300 relative ${
+        active ? 'text-pink-500 bg-pink-50' : 'text-gray-400 hover:text-gray-600'
+      }`}
+    >
+      {icon}
+      <span className="text-xs mt-1 font-medium">{label}</span>
+      {active && (
+        <div className="absolute bottom-0 w-6 h-1 bg-gradient-to-r from-pink-400 to-peach-400 rounded-full" />
+      )}
+    </button>
   );
 }
 
 function App() {
+  // I18nProvider 在最外层
   return (
     <I18nProvider>
-      <AppContent />
+      <ThemeProvider>
+        <TodoProvider>
+          <FallingItemsProvider>
+            <InnerAppContent />
+          </FallingItemsProvider>
+        </TodoProvider>
+      </ThemeProvider>
     </I18nProvider>
   );
 }
