@@ -31,9 +31,9 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        # 不使用 --frozen-lockfile 因为 lockfile 包含开发者本机的 link: 依赖（pnpm-store）
-        # pnpm install 会自动更新 lockfile，移除无效的 link:
-        run: pnpm install
+        # 删除旧的 lockfile 因为它仍引用已删除的 pnpm-store link: 依赖
+        # 让 pnpm install 基于当前 package.json 重新生成
+        run: rm -f pnpm-lock.yaml && pnpm install
 
       - name: Type check
         run: pnpm exec tsc -b --noEmit
