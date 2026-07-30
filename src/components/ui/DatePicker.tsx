@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { DayPicker } from 'react-day-picker';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import 'react-day-picker/dist/style.css';
-import { Calendar, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react';
 import './DatePicker.css';
 
 interface DatePickerProps {
@@ -18,22 +16,21 @@ interface DatePickerProps {
 /**
  * DatePicker — English-locale date input with click-to-open calendar popover.
  *
- * - Click the input or calendar icon to open a DayPicker popover.
- * - Outside-click or Esc closes it.
- * - Picker is locked to enUS so the calendar never shows system-locale text.
- * - Internal state is a Date object; we serialize to 'YYYY-MM-DD' for the form.
+ * Uses a custom calendar grid (no external picker library) for full control
+ * over locale and click behavior. Hardcoded enUS weekday / month names.
  */
-export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', className, id, ariaLabel }: DatePickerProps) {
+export function DatePicker({ value, onChange, placeholder = 'Pick a date', className, id, ariaLabel }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Parse current value into a Date, default to undefined for placeholder behavior
-  const selected = value ? new Date(value + 'T00:00:00') : undefined;
+  const today = new Date();
+  const initial = value ? new Date(value + 'T00:00:00') : today;
+  const [viewYear, setViewYear] = useState(initial.getFullYear());
+  const [viewMonth, setViewMonth] = useState(initial.getMonth());
 
   useEffect(() => {
     if (!open) return;
     const onClickOutside = (e: MouseEvent) => {
-      // Defer to next tick — by then any DayPicker onSelect/onDayClick has already fired
       setTimeout(() => {
         if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
           setOpen(false);
@@ -43,8 +40,6 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
     };
-    // Use 'click' not 'mousedown' — mousedown fires BEFORE DayPicker's button click,
-    // so mousedown handler can close the popover before onSelect fires.
     document.addEventListener('click', onClickOutside);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -53,37 +48,62 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
     };
   }, [open]);
 
-  const handleSelect = (date: Date | undefined) => {
-    // eslint-disable-next-line no-console
-    console.log('[DatePicker] handleSelect', date);
-    if (!date) {
-      onChange('');
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstWeekday = new Date(viewYear, viewMonth, 1).getDay(); // 0 = Sun
+
+  const prevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear(viewYear - 1);
     } else {
-      // Use local-time components (not UTC) to avoid TZ drift
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      onChange(`${y}-${m}-${d}`);
+      setViewMonth(viewMonth - 1);
     }
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear(viewYear + 1);
+    } else {
+      setViewMonth(viewMonth + 1);
+    }
+  };
+
+  const selectDate = (day: number) => {
+    const y = viewYear;
+    const m = String(viewMonth + 1).padStart(2, '0');
+    const d = String(day).padStart(2, '0');
+    onChange(`${y}-${m}-${d}`);
     setOpen(false);
   };
 
-  // DayPicker v8 fires onDayClick on every cell click, including outside-days.
-  // We use it as a more reliable trigger than onSelect (which can be no-op in some configs).
-  const handleDayClick = (day: Date) => {
-    // eslint-disable-next-line no-console
-    console.log('[DatePicker] handleDayClick', day);
-    handleSelect(day);
-  };
-
-  const handleClear = (e: React.MouseEvent) => {
+  const clearDate = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange('');
   };
 
+  const isToday = (day: number) =>
+    viewYear === today.getFullYear() && viewMonth === today.getMonth() && day === today.getDate();
+
+  const isSelected = (day: number) =>
+    value &&
+    viewYear === new Date(value + 'T00:00:00').getFullYear() &&
+    viewMonth === new Date(value + 'T00:00:00').getMonth() &&
+    day === new Date(value + 'T00:00:00').getDate();
+
   const displayValue = value
     ? format(new Date(value + 'T00:00:00'), 'EEE, MMM d, yyyy', { locale: enUS })
     : '';
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+  const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Build grid: leading nulls + day numbers
+  const cells: (number | null)[] = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let i = 1; i <= daysInMonth; i++) cells.push(i);
 
   return (
     <div ref={containerRef} className={`relative ${className ?? ''}`}>
@@ -103,7 +123,7 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
         {value && (
           <button
             type="button"
-            onClick={handleClear}
+            onClick={clearDate}
             aria-label="Clear date"
             className="px-2 border-t border-b border-r border-gray-200 bg-white/80 rounded-r-lg hover:bg-gray-50 text-gray-400 hover:text-gray-600"
           >
@@ -116,18 +136,64 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
         <div
           role="dialog"
           aria-label="Choose date"
-          className="absolute z-50 mt-1 bg-white rounded-lg shadow-lg border border-pink-100 p-2 min-w-[280px]"
+          className="absolute z-50 mt-1 bg-white rounded-lg shadow-lg border border-pink-100 p-3 min-w-[280px]"
         >
-          <DayPicker
-            mode="single"
-            selected={selected}
-            onDayClick={handleDayClick}
-            onSelect={handleSelect}
-            locale={enUS}
-            showOutsideDays
-            weekStartsOn={0}
-            required
-          />
+          {/* Header */}
+          <div className="flex items-center justify-between mb-2">
+            <button
+              type="button"
+              onClick={prevMonth}
+              aria-label="Previous month"
+              className="p-1.5 hover:bg-pink-50 rounded-full transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
+            </button>
+            <div className="text-sm font-semibold text-gray-800">
+              {monthNames[viewMonth]} {viewYear}
+            </div>
+            <button
+              type="button"
+              onClick={nextMonth}
+              aria-label="Next month"
+              className="p-1.5 hover:bg-pink-50 rounded-full transition-colors"
+            >
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+
+          {/* Weekday header */}
+          <div className="grid grid-cols-7 mb-1">
+            {weekdayNames.map((wd) => (
+              <div key={wd} className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wide py-1">
+                {wd}
+              </div>
+            ))}
+          </div>
+
+          {/* Day grid */}
+          <div className="grid grid-cols-7 gap-0.5">
+            {cells.map((day, i) =>
+              day === null ? (
+                <div key={i} />
+              ) : (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => selectDate(day)}
+                  className={`h-9 rounded-full text-sm transition-colors ${
+                    isSelected(day)
+                      ? 'bg-[#FFB7B2] text-white font-semibold'
+                      : isToday(day)
+                      ? 'text-[#FF6B61] font-bold hover:bg-pink-50'
+                      : 'text-gray-700 hover:bg-pink-50'
+                  }`}
+                  aria-label={`${monthNames[viewMonth]} ${day}, ${viewYear}`}
+                >
+                  {day}
+                </button>
+              )
+            )}
+          </div>
         </div>
       )}
     </div>
