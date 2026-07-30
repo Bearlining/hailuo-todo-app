@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useTodo } from '../../context/TodoContext';
 import { TodoCard } from './TodoCard';
 import { Card } from '../ui/card';
-import { PRIORITY_COLORS } from '../../types/todo';
+import { PRIORITY_COLORS, CATEGORY_KEYS } from '../../types/todo';
 import { useTranslation } from '../../i18n';
 
 interface KanbanViewProps {
