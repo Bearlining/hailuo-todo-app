@@ -49,6 +49,8 @@ export function DatePicker({ value, onChange, placeholder = 'YYYY-MM-DD', classN
   }, [open]);
 
   const handleSelect = (date: Date | undefined) => {
+    // eslint-disable-next-line no-console
+    console.log('[DatePicker] handleSelect', date);
     if (!date) {
       onChange('');
     } else {
